@@ -1,10 +1,101 @@
 import "./App.css";
 
+import { initializeApp } from "firebase/app";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  onChildAdded,
+  update,
+} from "firebase/database";
+
+import { useEffect, useRef, useState } from "react";
+
+import { useSnackbar } from "notistack";
+import { useDebounce } from "@uidotdev/usehooks";
+import { motion, AnimatePresence } from "framer-motion";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCjXVFc6h-s1UJ5DyUxlmnF3moIG9K6aAc",
+  authDomain: "thainads-speed-dating.firebaseapp.com",
+  databaseURL:
+    "https://thainads-speed-dating-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "thainads-speed-dating",
+  storageBucket: "thainads-speed-dating.appspot.com",
+  messagingSenderId: "753163570473",
+  appId: "1:753163570473:web:132c525e1875d70f3a7b38",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 function App() {
+  const { enqueueSnackbar } = useSnackbar();
+
+  // const [connections, setConnections] = useState([]);
+  const [users, setUsers] = useState({});
+  const debouncedUsers = useDebounce(users, 500);
+  // const [receivedConnections, setReceivedConnections] = useState({});
+  const receivedConnections = useRef({});
+
+  function getUsers() {
+    const usersRef = ref(db, "users");
+    onValue(usersRef, (snapshot) => {
+      const users = snapshot.val() || {};
+      setUsers(users);
+    });
+  }
+
+  function listenForNewConnections() {
+    const connectionsRef = ref(db, "connections");
+
+    onChildAdded(connectionsRef, (snapshot) => {
+      const newConnection = snapshot.val() || {};
+
+      const user1 = users[newConnection.user1];
+      const user2 = users[newConnection.user2];
+
+      // Check if the connection is new and has not been seen
+      if (
+        !newConnection?.seen &&
+        !receivedConnections.current[newConnection?.id]
+      ) {
+        // Mark the connection as received
+        receivedConnections.current[newConnection?.id] = true;
+
+        // Show a new connection notification
+        enqueueSnackbar("", {
+          variant: "newConnection",
+          anchorOrigin: {
+            vertical: "bottom",
+            horizontal: "right",
+          },
+          user1,
+          user2,
+        });
+
+        // Mark the connection as seen
+        update(ref(db, `connections/${newConnection.id}`), {
+          seen: true,
+        });
+      }
+    });
+  }
+
+  useEffect(() => {
+    getUsers();
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(users).length > 0) {
+      listenForNewConnections();
+    }
+  }, [users]);
+
   return (
     <>
       <iframe
-        src="http://127.0.0.1:5500/index-v2.0.2.html"
+        src={import.meta.env.VITE_GRAPH_DISPLAY_URL}
         title="Vite React Example"
         style={{
           position: "fixed",
@@ -14,9 +105,65 @@ function App() {
           overflow: "hidden",
           top: 0,
           left: 0,
+          zIndex: 1,
         }}
         sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
       ></iframe>
+      <div className="fixed top-0 left-0 p-4 z-[2] max-w-[350px] w-full">
+        <AnimatePresence>
+          {Object.values(debouncedUsers)
+            .filter((user) => Object.keys(user?.connections || {}).length > 0)
+            .sort((a, b) => {
+              // Sort by number of connections (descending)
+              const connectionDiff =
+                Object.keys(b.connections).length -
+                Object.keys(a.connections).length;
+
+              if (connectionDiff !== 0) {
+                return connectionDiff;
+              }
+
+              // If number of connections is the same, sort by last active (ascending)
+              return a.lastActive - b.lastActive;
+            })
+            .slice(0, 5)
+            .map((user, index) => (
+              <motion.div
+                layout
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.25 }}
+                key={user.username}
+                className={`relative flex items-center justify-between my-3 py-1 px-3 ${
+                  index == 0 ? "text-black" : "text-white"
+                } rounded-xl overflow-hidden`}
+              >
+                <div
+                  className={`absolute -z-10 top-0 left-0  w-full h-full ${
+                    index == 0 ? "bg-white" : "bg-slate-700"
+                  }`}
+                ></div>
+                <div className={`flex items-center min-w-0`}>
+                  <span className={`text-[30px] font-bold mr-2`}>
+                    {index + 1}
+                  </span>
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.displayName}
+                    className="w-10 h-10 rounded-full mr-2"
+                  />
+                  <strong className="whitespace-nowrap text-ellipsis overflow-hidden">
+                    {user.displayName}
+                  </strong>
+                </div>
+                <div className="text-lg font-semibold min-w-10">
+                  +{Object.keys(user.connections).length}
+                </div>
+              </motion.div>
+            ))}
+        </AnimatePresence>
+      </div>
     </>
   );
 }
