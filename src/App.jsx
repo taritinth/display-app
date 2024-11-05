@@ -86,6 +86,10 @@ function App() {
     getUsers();
   }, []);
 
+  // Get clientId from URL query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const clientId = urlParams.get("clientId");
+
   useEffect(() => {
     if (Object.keys(users).length > 0) {
       listenForNewConnections();
@@ -95,7 +99,10 @@ function App() {
   return (
     <>
       <iframe
-        src={import.meta.env.VITE_GRAPH_DISPLAY_URL}
+        src={
+          import.meta.env.VITE_GRAPH_DISPLAY_URL +
+          (clientId ? `?clientId=${clientId}` : "")
+        }
         title="Vite React Example"
         style={{
           position: "fixed",
