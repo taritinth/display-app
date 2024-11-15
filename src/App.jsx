@@ -192,12 +192,12 @@ function App() {
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.25 }}
               key={user.username}
-              className={`relative flex items-center justify-between my-3 py-2 px-3 ${getRankingLabelColor(
+              className={`relative flex items-center justify-between my-3 h-[64px] px-3 ${getRankingLabelColor(
                 index
               )} rounded-xl overflow-hidden`}
             >
               <div
-                className={`absolute -z-10 top-0 left-0  w-full h-full ${getRankingBgColor(
+                className={`absolute -z-10 top-0 left-0 w-full h-full ${getRankingBgColor(
                   index
                 )}`}
               ></div>
