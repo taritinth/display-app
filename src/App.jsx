@@ -29,6 +29,57 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+const getRankingIconSize = (index) => {
+  switch (index) {
+    case 0:
+      return "w-14";
+    case 1:
+      return "w-12";
+    case 2:
+      return "w-10";
+    default:
+      return "w-10";
+  }
+};
+const getRankingIcon = (index) => {
+  switch (index) {
+    case 0:
+      return "rank/nads.png";
+    case 1:
+      return "rank/gold.png";
+    case 2:
+      return "rank/silver.png";
+    default:
+      return "rank/bronze.png";
+  }
+};
+
+const getRankingBgColor = (index) => {
+  switch (index) {
+    case 0:
+      return "bg-violet-500";
+    case 1:
+      return "bg-amber-300";
+    case 2:
+      return "bg-zinc-200";
+    default:
+      return "bg-neutral-500";
+  }
+};
+
+const getRankingLabelColor = (index) => {
+  switch (index) {
+    case 0:
+      return "text-white";
+    case 1:
+      return "text-black";
+    case 2:
+      return "text-black";
+    default:
+      return "text-white";
+  }
+};
+
 function App() {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -141,19 +192,36 @@ function App() {
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.25 }}
               key={user.username}
-              className={`relative flex items-center justify-between my-3 py-1 px-3 ${
-                index == 0 ? "text-black" : "text-white"
-              } rounded-xl overflow-hidden`}
+              className={`relative flex items-center justify-between my-3 py-2 px-3 ${getRankingLabelColor(
+                index
+              )} rounded-xl overflow-hidden`}
             >
               <div
-                className={`absolute -z-10 top-0 left-0  w-full h-full ${
-                  index == 0 ? "bg-white" : "bg-slate-700"
-                }`}
+                className={`absolute -z-10 top-0 left-0  w-full h-full ${getRankingBgColor(
+                  index
+                )}`}
               ></div>
               <div className={`flex items-center min-w-0`}>
-                <span className={`text-[30px] font-bold mr-2`}>
-                  {index + 1}
-                </span>
+                <div className="relative w-[56px] flex justify-center items-center mr-2">
+                  <img
+                    src={getRankingIcon(index)}
+                    alt="bronze"
+                    className={`z-[1] ${getRankingIconSize(index)}`}
+                  />
+                  <span
+                    className={`absolute text-[24px] text-white font-bold z-[2]`}
+                    style={{
+                      top: "50%",
+                      left: "50%",
+                      transform:
+                        index < 3
+                          ? "translate(-50%, -60%)"
+                          : "translate(-50%, -50%)",
+                    }}
+                  >
+                    {index + 1}
+                  </span>
+                </div>
                 <img
                   src={user.avatarUrl}
                   alt={user.displayName}
