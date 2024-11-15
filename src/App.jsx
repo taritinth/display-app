@@ -202,7 +202,7 @@ function App() {
                 )}`}
               ></div>
               <div className={`flex items-center min-w-0`}>
-                <div className="relative w-[56px] flex justify-center items-center mr-2">
+                <div className="relative w-[56px] flex justify-center items-center mr-2 shrink-0">
                   <img
                     src={getRankingIcon(index)}
                     alt="bronze"
