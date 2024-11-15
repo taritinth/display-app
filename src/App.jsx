@@ -46,6 +46,21 @@ function App() {
     });
   }
 
+  const sortedUsersByRanking = Object.values(debouncedUsers)
+    .filter((user) => Object.keys(user?.connections || {}).length > 0)
+    .sort((a, b) => {
+      // Sort by number of connections (descending)
+      const connectionDiff =
+        Object.keys(b.connections).length - Object.keys(a.connections).length;
+
+      if (connectionDiff !== 0) {
+        return connectionDiff;
+      }
+
+      // If number of connections is the same, sort by last active (ascending)
+      return a.lastActive - b.lastActive;
+    });
+
   function listenForNewConnections() {
     const connectionsRef = ref(db, "connections");
 
@@ -118,57 +133,41 @@ function App() {
       ></iframe>
       <div className="fixed top-0 left-0 p-4 z-[2] max-w-[350px] w-full">
         <AnimatePresence>
-          {Object.values(debouncedUsers)
-            .filter((user) => Object.keys(user?.connections || {}).length > 0)
-            .sort((a, b) => {
-              // Sort by number of connections (descending)
-              const connectionDiff =
-                Object.keys(b.connections).length -
-                Object.keys(a.connections).length;
-
-              if (connectionDiff !== 0) {
-                return connectionDiff;
-              }
-
-              // If number of connections is the same, sort by last active (ascending)
-              return a.lastActive - b.lastActive;
-            })
-            .slice(0, 5)
-            .map((user, index) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -50 }}
-                transition={{ duration: 0.25 }}
-                key={user.username}
-                className={`relative flex items-center justify-between my-3 py-1 px-3 ${
-                  index == 0 ? "text-black" : "text-white"
-                } rounded-xl overflow-hidden`}
-              >
-                <div
-                  className={`absolute -z-10 top-0 left-0  w-full h-full ${
-                    index == 0 ? "bg-white" : "bg-slate-700"
-                  }`}
-                ></div>
-                <div className={`flex items-center min-w-0`}>
-                  <span className={`text-[30px] font-bold mr-2`}>
-                    {index + 1}
-                  </span>
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.displayName}
-                    className="w-10 h-10 rounded-full mr-2"
-                  />
-                  <strong className="whitespace-nowrap text-ellipsis overflow-hidden">
-                    {user.displayName}
-                  </strong>
-                </div>
-                <div className="text-lg font-semibold min-w-10">
-                  +{Object.keys(user.connections).length}
-                </div>
-              </motion.div>
-            ))}
+          {sortedUsersByRanking.slice(0, 5).map((user, index) => (
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 0.25 }}
+              key={user.username}
+              className={`relative flex items-center justify-between my-3 py-1 px-3 ${
+                index == 0 ? "text-black" : "text-white"
+              } rounded-xl overflow-hidden`}
+            >
+              <div
+                className={`absolute -z-10 top-0 left-0  w-full h-full ${
+                  index == 0 ? "bg-white" : "bg-slate-700"
+                }`}
+              ></div>
+              <div className={`flex items-center min-w-0`}>
+                <span className={`text-[30px] font-bold mr-2`}>
+                  {index + 1}
+                </span>
+                <img
+                  src={user.avatarUrl}
+                  alt={user.displayName}
+                  className="w-10 h-10 rounded-full mr-2"
+                />
+                <strong className="whitespace-nowrap text-ellipsis overflow-hidden">
+                  {user.displayName}
+                </strong>
+              </div>
+              <div className="text-lg font-semibold min-w-10">
+                +{Object.keys(user.connections).length}
+              </div>
+            </motion.div>
+          ))}
         </AnimatePresence>
       </div>
     </>
