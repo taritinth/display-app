@@ -112,6 +112,8 @@ function App() {
       return a.lastActive - b.lastActive;
     });
 
+  console.log("sortedUsersByRanking", sortedUsersByRanking);
+
   function listenForNewConnections() {
     const connectionsRef = ref(db, "connections");
 
