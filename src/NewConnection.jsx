@@ -7,7 +7,7 @@ const NewConnection = forwardRef(function NewConnection(props, ref) {
 
   return (
     <SnackbarContent ref={ref} role="alert" {...other}>
-      <div className="flex items-center text-black bg-white p-3 rounded-xl">
+      <div className="flex items-center text-black bg-white p-4 rounded-xl text-[24px]">
         <div className="relative flex items-center mr-6">
           <img
             src={user1?.avatarUrl}

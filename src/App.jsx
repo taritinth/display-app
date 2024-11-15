@@ -182,7 +182,7 @@ function App() {
         }}
         sandbox="allow-modals allow-forms allow-popups allow-scripts allow-same-origin"
       ></iframe>
-      <div className="fixed top-0 left-0 p-4 z-[2] max-w-[350px] w-full">
+      <div className="fixed top-0 left-0 p-4 z-[2] max-w-[400px] w-full">
         <AnimatePresence>
           {sortedUsersByRanking.slice(0, 5).map((user, index) => (
             <motion.div
@@ -227,7 +227,7 @@ function App() {
                   alt={user.displayName}
                   className="w-10 h-10 rounded-full mr-2"
                 />
-                <strong className="whitespace-nowrap text-ellipsis overflow-hidden">
+                <strong className="whitespace-nowrap text-ellipsis overflow-hidden text-[24px]">
                   {user.displayName}
                 </strong>
               </div>
